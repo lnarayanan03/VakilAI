@@ -37,3 +37,4 @@ streamlit
 python-dotenv
 pydantic
 requests
+langchain-tavily
