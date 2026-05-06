@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VakilAI — Know Your Rights</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:   #0f0e0c;
+      --gold: #c9a84c;
+      --text: #f7f4ed;
+      --muted: #9b9688;
+      --card-bg: #1a1814;
+      --border: #2e2b24;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      height: 64px;
+      background: rgba(15, 14, 12, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 24px 60px;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 50% 40%, rgba(201,168,76,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--text);
+      max-width: 780px;
+    }
+
+    .hero h1 span {
+      display: inline-block;
+      position: relative;
+    }
+
+    .hero h1 span::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 0; right: 0;
+      height: 3px;
+      background: var(--gold);
+      border-radius: 2px;
+    }
+
+    .hero-sub {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 520px;
+      line-height: 1.7;
+    }
+
+    .btn-primary {
+      margin-top: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      background: var(--gold);
+      color: #0f0e0c;
+      border: none;
+      border-radius: 4px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: opacity 0.2s, transform 0.15s;
+      text-decoration: none;
+    }
+
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    /* ── SECTION COMMON ── */
+    section { padding: 80px 48px; max-width: 1160px; margin: 0 auto; }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 48px;
+    }
+
+    /* ── ARTICLES GRID ── */
+    #articles { padding-top: 0; }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .card:hover {
+      border-color: rgba(201,168,76,0.35);
+      transform: translateY(-3px);
+    }
+
+    .card-tag {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: rgba(201,168,76,0.1);
+      padding: 4px 10px;
+      border-radius: 3px;
+      width: fit-content;
+    }
+
+    .card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .card-excerpt {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      /* stylelint-disable-next-line */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-link {
+      margin-top: auto;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--gold);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: gap 0.2s;
+    }
+
+    .card-link:hover { gap: 8px; }
+
+    /* ── DIVIDER ── */
+    .divider {
+      max-width: 1160px;
+      margin: 0 auto;
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 40px 48px;
+      max-width: 1160px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-disclaimer {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 640px;
+    }
+
+    .footer-copy {
+      font-size: 0.75rem;
+      color: #5a5750;
+    }
+
+    /* ═══════════════════════════════════════════
+       CHATBOT WIDGET
+    ═══════════════════════════════════════════ */
+
+    /* float button */
+    #chat-toggle {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 900;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: none;
+      cursor: pointer;
+      font-size: 1.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(201,168,76,0.35);
+      animation: wobble 2s ease-in-out infinite;
+      transition: transform 0.2s;
+    }
+
+    #chat-toggle:hover { animation-play-state: paused; transform: scale(1.08); }
+
+    #chat-toggle.status-online {
+      animation: wobble 2s ease-in-out infinite, onlinePulse 2s ease-in-out infinite;
+    }
+
+    #chat-toggle.status-offline {
+      box-shadow: 0 0 0 3px #ffffff, 0 0 0 6px #ef4444, 0 0 12px 8px rgba(239,68,68,0.4);
+    }
+
+    @keyframes wobble {
+      0%, 100% { transform: rotate(0deg); }
+      25%       { transform: rotate(-8deg); }
+      75%       { transform: rotate(8deg); }
+    }
+
+    @keyframes onlinePulse {
+      0%, 100% { box-shadow: 0 0 0 3px #ffffff, 0 0 0 6px  #22c55e, 0 0 12px  8px rgba(34,197,94,0.4); }
+      50%       { box-shadow: 0 0 0 3px #ffffff, 0 0 0 10px #22c55e, 0 0 16px 12px rgba(34,197,94,0.5); }
+    }
+
+    /* unread dot */
+    #unread-dot {
+      display: none;
+      position: absolute;
+      top: -3px; right: -3px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: #c9a84c;
+      border: 2px solid #0f0e0c;
+      animation: softPulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes softPulse {
+      0%   { transform: scale(1);    opacity: 1;   }
+      50%  { transform: scale(1.25); opacity: 0.6; }
+      100% { transform: scale(1);    opacity: 1;   }
+    }
+
+    /* status badge */
+    .chat-badge {
+      position: absolute;
+      top: 4px; right: 4px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+      background: #22c55e;
+    }
+
+    .chat-badge.offline { background: #ef4444; }
+
+    /* panel */
+    #chat-panel {
+      position: fixed;
+      top: 64px; right: 0;
+      z-index: 950;
+      width: 380px;
+      height: calc(100vh - 64px);
+      background: #ffffff;
+      border-radius: 24px 0 0 24px;
+      box-shadow: -8px 0 40px rgba(0,0,0,0.35);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(110%);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    #chat-panel.open { transform: translateX(0); }
+
+    /* panel header */
+    .chat-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 20px;
+      background: #0f0e0c;
+      flex-shrink: 0;
+    }
+
+    .chat-header-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gold);
+      flex: 1;
+    }
+
+    .online-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      flex-shrink: 0;
+    }
+
+    .chat-reset {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: transparent;
+      border: 1.5px solid var(--gold);
+      color: var(--gold);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .chat-reset:hover { background: var(--gold); color: #0f0e0c; }
+
+    .chat-close {
+      background: none;
+      border: none;
+      color: #9b9688;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+
+    .chat-close:hover { color: #f7f4ed; }
+
+    /* messages area */
+    #chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #faf9f7;
+    }
+
+    #chat-messages::-webkit-scrollbar { width: 4px; }
+    #chat-messages::-webkit-scrollbar-track { background: transparent; }
+    #chat-messages::-webkit-scrollbar-thumb { background: #d4d0c8; border-radius: 4px; }
+
+    .msg {
+      max-width: 88%;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .msg.user { align-self: flex-end; align-items: flex-end; }
+    .msg.bot  { align-self: flex-start; align-items: flex-start; }
+
+    .msg-bubble {
+      padding: 11px 15px;
+      border-radius: 18px;
+      font-size: 0.875rem;
+      line-height: 1.55;
+    }
+
+    .msg.user .msg-bubble {
+      background: #1a1814;
+      color: #f7f4ed;
+      border-bottom-right-radius: 4px;
+    }
+
+    .msg.bot .msg-bubble {
+      background: #f0ece2;
+      color: #1a1814;
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg-disclaimer {
+      font-size: 0.7rem;
+      color: #9b9688;
+      padding: 0 4px;
+      max-width: 280px;
+      line-height: 1.45;
+    }
+
+    .msg-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 0 4px;
+    }
+
+    .meta-chip {
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(201,168,76,0.12);
+      color: #7a6830;
+      font-weight: 500;
+    }
+
+    /* typing indicator */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 12px 14px;
+      background: #f0ece2;
+      border-radius: 18px;
+      border-bottom-left-radius: 4px;
+      width: fit-content;
+    }
+
+    .typing-indicator span {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #9b9688;
+      animation: bounce 1.2s ease-in-out infinite;
+    }
+
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30%            { transform: translateY(-6px); }
+    }
+
+    /* input row */
+    .chat-input-row {
+      display: flex;
+      gap: 10px;
+      padding: 14px 16px;
+      background: #ffffff;
+      border-top: 1px solid #e8e4da;
+      flex-shrink: 0;
+    }
+
+    #chat-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #ddd8cc;
+      border-radius: 22px;
+      background: #faf9f7;
+      color: #1a1814;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.2s;
+      resize: none;
+    }
+
+    #chat-input:focus { border-color: #c9a84c; }
+    #chat-input::placeholder { color: #b0a897; }
+
+    #chat-send {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+
+    #chat-send:hover { opacity: 0.85; transform: scale(1.06); }
+    #chat-send:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    #chat-send svg {
+      width: 18px; height: 18px;
+      fill: #0f0e0c;
+      transform: translateX(1px);
+    }
+
+    @media (max-width: 480px) {
+      #chat-panel { width: 100vw; border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ NAVBAR ═══ -->
+  <nav>
+    <a href="#" class="nav-logo">⚖️ VakilAI</a>
+    <ul class="nav-links">
+      <li><a href="#articles">Articles</a></li>
+      <li><a href="#rights">Rights</a></li>
+      <li><a href="#constitution">Constitution</a></li>
+      <li><a href="#acts">Acts</a></li>
+    </ul>
+  </nav>
+
+  <!-- ═══ HERO ═══ -->
+  <div class="hero">
+    <p class="hero-eyebrow">Indian Legal Intelligence</p>
+    <h1>
+      Know Your <span>Rights</span>.<br />Know Your Laws.
+    </h1>
+    <p class="hero-sub">
+      Plain-language answers to complex legal questions — powered by RAG across
+      India's statutes, constitutional provisions, and landmark judgements.
+    </p>
+    <button class="btn-primary" onclick="openChat()">
+      Ask VakilAI →
+    </button>
+  </div>
+
+  <!-- ═══ ARTICLES ═══ -->
+  <section id="articles">
+    <p class="section-label">Featured Articles</p>
+    <p class="section-title">Legal Knowledge, Simplified</p>
+
+    <div class="cards-grid">
+      <article class="card">
+        <span class="card-tag">Constitutional Law</span>
+        <h2 class="card-title">Fundamental Rights under Article 19</h2>
+        <p class="card-excerpt">
+          Article 19 guarantees six fundamental freedoms to every Indian citizen — including
+          freedom of speech, assembly, and movement — with reasonable restrictions defined by the state.
+        </p>
+        <a href="#" class="card-link">Read more →</a>
+      </article>
+
+      <article class="card">
+        <span class="card-tag">Consumer Law</span>
+        <h2 class="card-title">Consumer Protection Act 2019 — What You Must Know</h2>
+        <p class="card-excerpt">
+          The 2019 Act vastly expands consumer rights: e-commerce liability, product liability provisions,
+          a Central Consumer Protection Authority, and penalties for misleading advertisements.
+        </p>
+        <a href="#" class="card-link">Read more →</a>
+      </article>
+
+      <article class="card">
+        <span class="card-tag">RTI Act</span>
+        <h2 class="card-title">RTI Act — How to File an Application</h2>
+        <p class="card-excerpt">
+          Any citizen can seek information from any public authority within 30 days. Learn how to draft
+          your RTI request, pay the fee, and escalate to the State or Central Information Commission.
+        </p>
+        <a href="#" class="card-link">Read more →</a>
+      </article>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer>
+    <p class="footer-disclaimer">
+      <strong>Disclaimer:</strong> Content published on VakilAI is for general informational and educational
+      purposes only and does not constitute legal advice. Laws are subject to change; always consult a
+      qualified advocate before taking any legal action.
+    </p>
+    <p class="footer-copy">© 2026 VakilAI. All rights reserved.</p>
+  </footer>
+
+  <!-- ═══════════════════════════════════════
+       CHATBOT WIDGET
+  ═══════════════════════════════════════ -->
+
+  <!-- Float button -->
+  <button id="chat-toggle" aria-label="Open VakilAI chat" onclick="openChat()">
+    ⚖️
+    <span class="chat-badge" id="status-badge"></span>
+    <span id="unread-dot"></span>
+  </button>
+
+  <!-- Chat panel -->
+  <div id="chat-panel" role="dialog" aria-modal="true" aria-label="VakilAI chat">
+    <div class="chat-header">
+      <span class="chat-header-title">⚖️ VakilAI</span>
+      <span class="online-dot" id="online-dot"></span>
+      <button class="chat-reset" onclick="resetChat()" aria-label="Reset chat" title="Reset chat">↺</button>
+      <button class="chat-close" onclick="closeChat()" aria-label="Close chat">✕</button>
+    </div>
+
+    <div id="chat-messages"></div>
+
+    <div class="chat-input-row">
+      <input
+        id="chat-input"
+        type="text"
+        placeholder="Ask a legal question…"
+        autocomplete="off"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"
+      />
+      <button id="chat-send" onclick="sendMessage()" aria-label="Send">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const API = '';
+    const SESSION_ID = crypto.randomUUID();
+    let isOnline = true;
+    let isBotTyping = false;
+    let firstMessage = true;
+
+    // ── panel open / close ──
+    function openChat() {
+      document.getElementById('chat-panel').classList.add('open');
+      document.getElementById('unread-dot').style.display = 'none';
+      document.getElementById('chat-input').focus();
+    }
+
+    function closeChat() {
+      document.getElementById('chat-panel').classList.remove('open');
+    }
+
+    // ── health check ──
+    async function checkHealth() {
+      try {
+        const r = await fetch(`${API}/health`, { signal: AbortSignal.timeout(4000) });
+        const data = await r.json();
+        isOnline = data.status === 'ok';
+      } catch {
+        isOnline = false;
+      }
+      const badge = document.getElementById('status-badge');
+      const dot   = document.getElementById('online-dot');
+      const btn   = document.getElementById('chat-toggle');
+      badge.className = 'chat-badge' + (isOnline ? '' : ' offline');
+      dot.style.background = isOnline ? '#22c55e' : '#ef4444';
+      btn.classList.remove('status-online', 'status-offline');
+      btn.classList.add(isOnline ? 'status-online' : 'status-offline');
+    }
+
+    // ── message rendering ──
+    function appendMessage(role, text, disclaimer) {
+      const container = document.getElementById('chat-messages');
+
+      const wrapper = document.createElement('div');
+      wrapper.className = `msg ${role}`;
+
+      const bubble = document.createElement('div');
+      bubble.className = 'msg-bubble';
+      bubble.textContent = text;
+      wrapper.appendChild(bubble);
+
+      if (disclaimer) {
+        const disc = document.createElement('p');
+        disc.className = 'msg-disclaimer';
+        disc.textContent = disclaimer;
+        wrapper.appendChild(disc);
+      }
+
+      container.appendChild(wrapper);
+      container.scrollTop = container.scrollHeight;
+      return bubble;
+    }
+
+    function showTyping() {
+      const container = document.getElementById('chat-messages');
+      const wrapper = document.createElement('div');
+      wrapper.className = 'msg bot';
+      wrapper.id = 'typing-wrapper';
+
+      const indicator = document.createElement('div');
+      indicator.className = 'typing-indicator';
+      indicator.innerHTML = '<span></span><span></span><span></span>';
+      wrapper.appendChild(indicator);
+
+      container.appendChild(wrapper);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function removeTyping() {
+      const el = document.getElementById('typing-wrapper');
+      if (el) el.remove();
+    }
+
+    function streamWords(bubble, fullText) {
+      const words = fullText.split(' ');
+      let i = 0;
+      bubble.textContent = '';
+      return new Promise(resolve => {
+        const timer = setInterval(() => {
+          if (i < words.length) {
+            bubble.textContent += (i === 0 ? '' : ' ') + words[i];
+            document.getElementById('chat-messages').scrollTop =
+              document.getElementById('chat-messages').scrollHeight;
+            i++;
+          } else {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 30);
+      });
+    }
+
+    function appendMeta(law, sections, confidence) {
+      if (!law && !sections?.length) return;
+      const container = document.getElementById('chat-messages');
+      const lastMsg = container.querySelector('.msg.bot:last-child');
+      if (!lastMsg) return;
+
+      const meta = document.createElement('div');
+      meta.className = 'msg-meta';
+
+      if (law) {
+        const chip = document.createElement('span');
+        chip.className = 'meta-chip';
+        chip.textContent = law;
+        meta.appendChild(chip);
+      }
+
+      (sections || []).slice(0, 3).forEach(s => {
+        const chip = document.createElement('span');
+        chip.className = 'meta-chip';
+        chip.textContent = s;
+        meta.appendChild(chip);
+      });
+
+      if (confidence) {
+        const chip = document.createElement('span');
+        chip.className = 'meta-chip';
+        chip.textContent = `Confidence: ${confidence}`;
+        meta.appendChild(chip);
+      }
+
+      lastMsg.appendChild(meta);
+    }
+
+    // ── send ──
+    async function sendMessage() {
+      if (isBotTyping) return;
+      const input = document.getElementById('chat-input');
+      const sendBtn = document.getElementById('chat-send');
+      const question = input.value.trim();
+      if (!question) return;
+
+      input.value = '';
+      input.disabled = true;
+      sendBtn.disabled = true;
+      isBotTyping = true;
+
+      appendMessage('user', question);
+      showTyping();
+
+      try {
+        const res = await fetch(`${API}/ask`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question, session_id: SESSION_ID }),
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        removeTyping();
+
+        const showDisclaimer = firstMessage ? data.disclaimer : null;
+        firstMessage = false;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'msg bot';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble';
+        wrapper.appendChild(bubble);
+
+        if (showDisclaimer) {
+          const disc = document.createElement('p');
+          disc.className = 'msg-disclaimer';
+          disc.textContent = showDisclaimer;
+          wrapper.appendChild(disc);
+        }
+
+        document.getElementById('chat-messages').appendChild(wrapper);
+        document.getElementById('chat-messages').scrollTop =
+          document.getElementById('chat-messages').scrollHeight;
+
+        await streamWords(bubble, data.answer);
+        appendMeta(data.applicable_law, data.section_numbers, data.confidence);
+
+        if (!document.getElementById('chat-panel').classList.contains('open')) {
+          document.getElementById('unread-dot').style.display = 'block';
+        }
+
+      } catch (err) {
+        removeTyping();
+        appendMessage('bot', 'Sorry, I could not reach the server. Please try again.');
+        firstMessage = false;
+        if (!document.getElementById('chat-panel').classList.contains('open')) {
+          document.getElementById('unread-dot').style.display = 'block';
+        }
+      }
+
+      input.disabled = false;
+      sendBtn.disabled = false;
+      isBotTyping = false;
+      input.focus();
+    }
+
+    // ── reset chat ──
+    function resetChat() {
+      firstMessage = true;
+      document.getElementById('chat-messages').innerHTML = '';
+      appendMessage(
+        'bot',
+        'Hello! I am VakilAI, your Indian legal assistant. Ask me any legal question about IPC, RTI, Constitution, or Consumer Protection.'
+      );
+    }
+
+    // ── init ──
+    checkHealth();
+  </script>
+</body>
+</html>

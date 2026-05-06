@@ -1,0 +1,39 @@
+# Core LangChain
+langchain
+langchain-core
+langchain-community
+langchain-groq
+langchain-qdrant
+langchain-huggingface
+langchain-text-splitters
+
+# LangGraph + LangSmith
+langgraph
+langsmith
+
+# Serving
+fastapi
+uvicorn[standard]
+langserve[server]
+sse-starlette
+
+# Vector store + embeddings
+qdrant-client
+sentence-transformers
+
+# Document loading
+pypdf
+
+# Memory backend
+redis
+
+# Web search
+tavily-python
+
+# Streamlit UI
+streamlit
+
+# Utils
+python-dotenv
+pydantic
+requests
