@@ -1681,7 +1681,7 @@
       dot.style.background = isOnline ? '#22c55e' : '#ef4444';
       btn.classList.remove('status-online');
       if (isOnline) btn.classList.add('status-online');
-      if (status) status.textContent = isOnline ? '● Online · Ready' : '● Offline';
+      if (status) { status.textContent = isOnline ? '● Online · Ready' : '● Offline'; status.style.color = isOnline ? '#22c55e' : '#ef4444'; }
     }
 
     function appendMessage(role, text, disclaimer) {
