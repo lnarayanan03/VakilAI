@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -23,12 +26,14 @@
       --muted:   #6b6457;
       --border:  #d4cfc4;
       --white:   #ffffff;
+      --online:  #22c55e;
+      --offline: #ef4444;
     }
 
     html { scroll-behavior: smooth; }
 
     body {
-      background: var(--cream);
+      background: var(--navy);
       color: var(--text);
       font-family: 'Source Serif 4', Georgia, serif;
       font-size: 16px;
@@ -36,13 +41,28 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    /* ─── THREE.JS CANVAS ─── */
+    #three-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
     /* ─── NAVBAR ─── */
     nav {
       position: fixed;
       top: 0; left: 0; right: 0;
       z-index: 200;
+      background: transparent;
+      transition: background 0.4s, border-color 0.4s;
+      border-bottom: 1px solid transparent;
+    }
+
+    nav.scrolled {
       background: var(--navy);
-      border-bottom: 3px solid var(--gold);
+      border-bottom-color: var(--gold);
     }
 
     .nav-inner {
@@ -72,6 +92,12 @@
       align-items: center;
       justify-content: center;
       font-size: 1.1rem;
+      animation: logoPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes logoPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(184,150,62,0.4); }
+      50%       { box-shadow: 0 0 0 8px rgba(184,150,62,0); }
     }
 
     .nav-logo-text {
@@ -82,9 +108,7 @@
       letter-spacing: 0.01em;
     }
 
-    .nav-logo-text span {
-      color: var(--gold2);
-    }
+    .nav-logo-text span { color: var(--gold2); }
 
     .nav-links {
       display: flex;
@@ -124,7 +148,6 @@
 
     .nav-cta:hover { background: var(--gold2); }
 
-    /* hamburger */
     .nav-hamburger {
       display: none;
       flex-direction: column;
@@ -137,8 +160,7 @@
 
     .nav-hamburger span {
       display: block;
-      width: 24px;
-      height: 2px;
+      width: 24px; height: 2px;
       background: var(--cream);
       border-radius: 2px;
       transition: all 0.3s;
@@ -185,41 +207,55 @@
 
     /* ─── HERO ─── */
     .hero {
-      background: var(--navy);
-      padding: 120px 24px 80px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       position: relative;
-      overflow: hidden;
-    }
-
-    .hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(184,150,62,0.06) 80px),
-        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(184,150,62,0.06) 80px);
-      pointer-events: none;
-    }
-
-    .hero::after {
-      content: '§';
-      position: absolute;
-      right: -40px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(200px, 25vw, 360px);
-      color: rgba(184,150,62,0.04);
-      line-height: 1;
-      pointer-events: none;
-      user-select: none;
+      z-index: 1;
+      padding: 120px 24px 80px;
     }
 
     .hero-inner {
       max-width: 1200px;
+      width: 100%;
       margin: 0 auto;
       position: relative;
-      z-index: 1;
+    }
+
+    .hero-glass {
+      background: rgba(13,27,46,0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(184,150,62,0.2);
+      border-radius: 16px;
+      padding: 60px;
+      position: relative;
+      overflow: hidden;
+      max-width: 800px;
+    }
+
+    .hero-glass-line {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: linear-gradient(to bottom, var(--gold), var(--gold2));
+      border-radius: 3px 0 0 3px;
+      transform-origin: top;
+      transform: scaleY(0);
+    }
+
+    .hero-glass::after {
+      content: '§';
+      position: absolute;
+      right: -20px; top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(120px, 18vw, 220px);
+      color: rgba(184,150,62,0.04);
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
     }
 
     .hero-rule {
@@ -227,13 +263,14 @@
       align-items: center;
       gap: 12px;
       margin-bottom: 28px;
+      opacity: 0;
+      transform: translateY(20px);
     }
 
     .hero-rule::before {
       content: '';
       display: block;
-      width: 40px;
-      height: 2px;
+      width: 40px; height: 2px;
       background: var(--gold);
     }
 
@@ -247,12 +284,18 @@
 
     .hero h1 {
       font-family: 'Playfair Display', serif;
-      font-size: clamp(2.4rem, 6vw, 5rem);
+      font-size: clamp(2.8rem, 7vw, 6rem);
       font-weight: 900;
-      line-height: 1.08;
+      line-height: 1.05;
       color: var(--white);
       max-width: 720px;
       margin-bottom: 24px;
+    }
+
+    .hero-h1-line1, .hero-h1-line2, .hero-h1-em {
+      display: block;
+      opacity: 0;
+      transform: translateY(24px);
     }
 
     .hero h1 em {
@@ -267,12 +310,15 @@
       line-height: 1.75;
       margin-bottom: 40px;
       font-weight: 300;
+      opacity: 0;
     }
 
     .hero-actions {
       display: flex;
       gap: 16px;
       flex-wrap: wrap;
+      opacity: 0;
+      transform: scale(0.95);
     }
 
     .btn-primary {
@@ -317,15 +363,14 @@
 
     .btn-ghost:hover { border-color: var(--gold); color: var(--gold2); }
 
-    /* hero stats */
     .hero-stats {
       display: flex;
-      gap: 48px;
+      gap: 32px;
       margin-top: 56px;
       padding-top: 40px;
       border-top: 1px solid rgba(184,150,62,0.2);
       flex-wrap: wrap;
-      gap: 32px;
+      opacity: 0;
     }
 
     .stat {
@@ -349,11 +394,19 @@
       text-transform: uppercase;
     }
 
+    /* ─── CONTENT LAYER ─── */
+    .content-layer {
+      position: relative;
+      z-index: 1;
+      background: var(--cream);
+    }
+
     /* ─── ACTS BANNER ─── */
     .acts-banner {
       background: var(--gold);
       padding: 14px 24px;
       overflow: hidden;
+      position: relative;
     }
 
     .acts-inner {
@@ -389,6 +442,26 @@
       color: var(--navy);
       font-weight: 600;
       letter-spacing: 0.03em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .act-pill::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%);
+      transform: translateX(-100%);
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    .act-pill:nth-child(2)::after { animation-delay: 0.5s; }
+    .act-pill:nth-child(3)::after { animation-delay: 1s; }
+    .act-pill:nth-child(4)::after { animation-delay: 1.5s; }
+
+    @keyframes shimmer {
+      0%   { transform: translateX(-100%); }
+      50%, 100% { transform: translateX(200%); }
     }
 
     /* ─── SECTIONS ─── */
@@ -447,26 +520,31 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
-      transition: box-shadow 0.2s, transform 0.2s;
       position: relative;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      will-change: transform;
     }
 
     .card::before {
       content: '';
       position: absolute;
       top: 0; left: 0;
-      width: 4px;
-      height: 0;
+      width: 4px; height: 0;
       background: var(--gold);
       transition: height 0.3s;
     }
 
-    .card:hover {
-      box-shadow: 0 8px 32px rgba(13,27,46,0.12);
-      transform: translateY(-2px);
-      z-index: 1;
+    .card-shimmer {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(184,150,62,0.08) 0%, transparent 60%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
     }
 
+    .card:hover .card-shimmer { opacity: 1; }
     .card:hover::before { height: 100%; }
 
     .card-tag {
@@ -508,7 +586,7 @@
       gap: 6px;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      transition: gap 0.2s;
+      transition: gap 0.2s, color 0.2s;
     }
 
     .card-link:hover { gap: 10px; color: var(--navy); }
@@ -517,11 +595,24 @@
     .feature-strip {
       background: var(--navy);
       padding: 64px 24px;
+      position: relative;
+    }
+
+    .feature-strip::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(184,150,62,0.04) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(184,150,62,0.04) 40px);
+      pointer-events: none;
     }
 
     .feature-strip-inner {
       max-width: 1200px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
 
     .feature-strip-title {
@@ -542,21 +633,47 @@
     }
 
     .feature {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      perspective: 600px;
     }
 
-    .feature-icon {
+    .feature-flip {
+      position: relative;
       width: 44px; height: 44px;
-      background: rgba(184,150,62,0.15);
-      border: 1px solid rgba(184,150,62,0.3);
+      transform-style: preserve-3d;
+      transition: transform 0.5s;
+      margin-bottom: 10px;
+    }
+
+    .feature:hover .feature-flip { transform: rotateY(180deg); }
+
+    .feature-flip-front,
+    .feature-flip-back {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
       border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    .feature-flip-front {
+      background: rgba(184,150,62,0.15);
+      border: 1px solid rgba(184,150,62,0.3);
       font-size: 1.2rem;
-      flex-shrink: 0;
+    }
+
+    .feature-flip-back {
+      background: var(--gold);
+      transform: rotateY(180deg);
+      font-size: 0.55rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--navy);
+      letter-spacing: 0.05em;
+      text-align: center;
+      padding: 4px;
+      line-height: 1.3;
     }
 
     .feature-name {
@@ -570,6 +687,24 @@
       font-size: 0.82rem;
       color: rgba(245,240,232,0.55);
       line-height: 1.6;
+    }
+
+    /* ─── ACTS SECTION ─── */
+    #acts {
+      position: relative;
+    }
+
+    #acts::before {
+      content: '§';
+      position: absolute;
+      right: 0; top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(180px, 22vw, 320px);
+      color: rgba(184,150,62,0.04);
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
     }
 
     /* ─── DISCLAIMER ─── */
@@ -587,18 +722,9 @@
       align-items: flex-start;
     }
 
-    .disclaimer-icon {
-      font-size: 1.2rem;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
+    .disclaimer-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
 
-    .disclaimer-text {
-      font-size: 0.78rem;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
+    .disclaimer-text { font-size: 0.78rem; color: var(--muted); line-height: 1.6; }
     .disclaimer-text strong { color: var(--text); }
 
     /* ─── FOOTER ─── */
@@ -607,10 +733,7 @@
       padding: 48px 24px 32px;
     }
 
-    .footer-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+    .footer-inner { max-width: 1200px; margin: 0 auto; }
 
     .footer-top {
       display: flex;
@@ -622,19 +745,13 @@
       flex-wrap: wrap;
     }
 
-    .footer-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .footer-brand { display: flex; align-items: center; gap: 10px; }
 
     .footer-brand-icon {
       width: 32px; height: 32px;
       background: var(--gold);
       border-radius: 3px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       font-size: 1rem;
     }
 
@@ -645,18 +762,9 @@
       color: var(--white);
     }
 
-    .footer-tagline {
-      font-size: 0.78rem;
-      color: rgba(245,240,232,0.4);
-      margin-top: 8px;
-      font-style: italic;
-    }
+    .footer-tagline { font-size: 0.78rem; color: rgba(245,240,232,0.4); margin-top: 8px; font-style: italic; }
 
-    .footer-links {
-      display: flex;
-      gap: 48px;
-      flex-wrap: wrap;
-    }
+    .footer-links { display: flex; gap: 48px; flex-wrap: wrap; }
 
     .footer-col h4 {
       font-family: 'JetBrains Mono', monospace;
@@ -671,11 +779,7 @@
     .footer-col a { font-size: 0.82rem; color: rgba(245,240,232,0.5); text-decoration: none; transition: color 0.2s; }
     .footer-col a:hover { color: var(--gold2); }
 
-    .footer-bottom {
-      margin-top: 24px;
-      font-size: 0.72rem;
-      color: rgba(245,240,232,0.25);
-    }
+    .footer-bottom { margin-top: 24px; font-size: 0.72rem; color: rgba(245,240,232,0.25); }
 
     /* ═══════════════════════════════════
        CHATBOT WIDGET
@@ -683,14 +787,12 @@
 
     #chat-toggle {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
+      bottom: 24px; right: 24px;
       z-index: 900;
-      width: 58px;
-      height: 58px;
+      width: 58px; height: 58px;
       border-radius: 50%;
       background: var(--navy);
-      border: none;
+      border: 2px solid var(--gold);
       cursor: pointer;
       font-size: 1.4rem;
       display: flex;
@@ -698,19 +800,19 @@
       justify-content: center;
       box-shadow: 0 4px 24px rgba(13,27,46,0.4);
       transition: transform 0.2s, background 0.2s;
+      overflow: visible;
     }
 
     #chat-toggle:hover { transform: scale(1.08); background: var(--navy3); }
 
     #chat-toggle.status-online {
-      box-shadow: 0 0 0 0 rgba(34,197,94,0.4);
-      animation: onlinePulse 2.5s ease-in-out infinite;
+      animation: togglePulse 2.5s ease-in-out infinite;
     }
 
-    @keyframes onlinePulse {
-      0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.4), 0 4px 24px rgba(184,150,62,0.4); }
-      70%  { box-shadow: 0 0 0 10px rgba(34,197,94,0), 0 4px 24px rgba(184,150,62,0.4); }
-      100% { box-shadow: 0 0 0 0 rgba(34,197,94,0), 0 4px 24px rgba(184,150,62,0.4); }
+    @keyframes togglePulse {
+      0%   { box-shadow: 0 0 0 0 rgba(184,150,62,0.5), 0 4px 24px rgba(13,27,46,0.4); }
+      70%  { box-shadow: 0 0 0 10px rgba(184,150,62,0), 0 4px 24px rgba(13,27,46,0.4); }
+      100% { box-shadow: 0 0 0 0 rgba(184,150,62,0), 0 4px 24px rgba(13,27,46,0.4); }
     }
 
     .chat-badge {
@@ -718,11 +820,11 @@
       top: 2px; right: 2px;
       width: 13px; height: 13px;
       border-radius: 50%;
-      border: 2px solid var(--cream);
-      background: #22c55e;
+      border: 2px solid var(--navy);
+      background: var(--online);
     }
 
-    .chat-badge.offline { background: #ef4444; }
+    .chat-badge.offline { background: var(--offline); }
 
     #unread-dot {
       display: none;
@@ -734,16 +836,15 @@
       border: 2px solid var(--cream);
     }
 
-    /* panel */
     #chat-panel {
       position: fixed;
       bottom: 0; right: 0;
       z-index: 950;
-      width: 400px;
+      width: 420px;
       height: 600px;
       max-height: calc(100vh - 80px);
       background: var(--white);
-      border-radius: 12px 12px 0 0;
+      border-radius: 16px 16px 0 0;
       box-shadow: 0 -8px 48px rgba(13,27,46,0.25);
       display: flex;
       flex-direction: column;
@@ -768,9 +869,7 @@
       width: 34px; height: 34px;
       background: var(--gold);
       border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       font-size: 1rem;
       flex-shrink: 0;
     }
@@ -795,7 +894,7 @@
     .online-dot {
       width: 7px; height: 7px;
       border-radius: 50%;
-      background: #22c55e;
+      background: var(--online);
       flex-shrink: 0;
     }
 
@@ -807,9 +906,7 @@
       color: var(--gold);
       font-size: 0.95rem;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
       transition: background 0.15s;
     }
@@ -829,7 +926,6 @@
 
     .chat-close:hover { color: var(--white); }
 
-    /* messages */
     #chat-messages {
       flex: 1;
       overflow-y: auto;
@@ -872,6 +968,7 @@
       color: var(--text);
       border-bottom-left-radius: 4px;
       border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
     }
 
     .msg-disclaimer {
@@ -909,6 +1006,7 @@
       border-radius: 14px;
       border-bottom-left-radius: 4px;
       border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
       width: fit-content;
     }
 
@@ -927,7 +1025,6 @@
       30%            { transform: translateY(-5px); }
     }
 
-    /* input */
     .chat-input-row {
       display: flex;
       gap: 10px;
@@ -959,9 +1056,7 @@
       background: var(--gold);
       border: none;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
       transition: background 0.2s;
     }
@@ -983,7 +1078,8 @@
       .nav-hamburger { display: flex; }
 
       .hero { padding: 100px 20px 60px; }
-      .hero::after { display: none; }
+      .hero-glass { padding: 36px 24px; }
+      .hero-glass::after { display: none; }
       .hero-stats { gap: 24px; }
       .stat-num { font-size: 1.5rem; }
 
@@ -995,7 +1091,6 @@
 
       .cards-grid { grid-template-columns: 1fr; }
       .features-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
-
       .feature-strip { padding: 48px 20px; }
 
       .footer-top { flex-direction: column; gap: 32px; }
@@ -1013,7 +1108,7 @@
     }
 
     @media (max-width: 480px) {
-      .hero h1 { font-size: 2rem; }
+      .hero h1 { font-size: 2.2rem; }
       .hero-actions { flex-direction: column; }
       .btn-primary, .btn-ghost { width: 100%; justify-content: center; }
       .hero-stats { flex-direction: column; gap: 16px; }
@@ -1025,8 +1120,10 @@
 </head>
 <body>
 
+  <canvas id="three-canvas"></canvas>
+
   <!-- ═══ NAVBAR ═══ -->
-  <nav>
+  <nav id="navbar">
     <div class="nav-inner">
       <a href="#" class="nav-logo">
         <div class="nav-logo-icon">⚖️</div>
@@ -1055,218 +1152,243 @@
   <!-- ═══ HERO ═══ -->
   <section class="hero">
     <div class="hero-inner">
-      <div class="hero-rule">
-        <span class="hero-eyebrow">Indian Legal Intelligence · Est. 2025</span>
-      </div>
-      <h1>
-        Your Rights.<br/>
-        Plain Language.<br/>
-        <em>Instant Answers.</em>
-      </h1>
-      <p class="hero-sub">
-        AI-powered legal assistance grounded in India's statutes — the IPC, Constitution,
-        RTI Act, and Consumer Protection Act. No jargon. No gatekeeping.
-      </p>
-      <div class="hero-actions">
-        <button class="btn-primary" onclick="openChat()">
-          Consult VakilAI →
-        </button>
-        <a href="#articles" class="btn-ghost">Browse Articles</a>
-      </div>
-      <div class="hero-stats">
-        <div class="stat">
-          <span class="stat-num">4</span>
-          <span class="stat-label">Acts Indexed</span>
+      <div class="hero-glass">
+        <div class="hero-glass-line" id="hero-line"></div>
+        <div class="hero-rule">
+          <span class="hero-eyebrow">Indian Legal Intelligence · Est. 2025</span>
         </div>
-        <div class="stat">
-          <span class="stat-num">2,394</span>
-          <span class="stat-label">Legal Chunks</span>
+        <h1>
+          <span class="hero-h1-line1">Your Rights.</span>
+          <span class="hero-h1-line2">Plain Language.</span>
+          <em class="hero-h1-em">Instant Answers.</em>
+        </h1>
+        <p class="hero-sub">
+          AI-powered legal assistance grounded in India's statutes — the IPC, Constitution,
+          RTI Act, and Consumer Protection Act. No jargon. No gatekeeping.
+        </p>
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="openChat()">Consult VakilAI →</button>
+          <a href="#articles" class="btn-ghost">Browse Articles</a>
         </div>
-        <div class="stat">
-          <span class="stat-num">581</span>
-          <span class="stat-label">Pages Parsed</span>
-        </div>
-        <div class="stat">
-          <span class="stat-num">RAG</span>
-          <span class="stat-label">Powered Retrieval</span>
+        <div class="hero-stats">
+          <div class="stat">
+            <span class="stat-num">4</span>
+            <span class="stat-label">Acts Indexed</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num" data-target="2394" id="counter-chunks">0</span>
+            <span class="stat-label">Legal Chunks</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num" data-target="581" id="counter-pages">0</span>
+            <span class="stat-label">Pages Parsed</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">RAG</span>
+            <span class="stat-label">Powered Retrieval</span>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ═══ ACTS BANNER ═══ -->
-  <div class="acts-banner">
-    <div class="acts-inner">
-      <span class="acts-label">Covers</span>
-      <div class="acts-list">
-        <span class="act-pill">Indian Penal Code 1860</span>
-        <span class="act-pill">Constitution of India</span>
-        <span class="act-pill">RTI Act 2005</span>
-        <span class="act-pill">Consumer Protection Act 2019</span>
-      </div>
-    </div>
-  </div>
+  <!-- ═══ CONTENT LAYER ═══ -->
+  <div class="content-layer">
 
-  <!-- ═══ ARTICLES ═══ -->
-  <div id="articles">
-    <div class="section">
-      <div class="section-header">
-        <span class="section-num">01</span>
-        <div>
-          <p class="section-label">Featured Articles</p>
-          <h2 class="section-title">Legal Knowledge, Simplified</h2>
-        </div>
-      </div>
-      <div class="cards-grid">
-        <article class="card">
-          <span class="card-tag">Constitutional Law</span>
-          <h3 class="card-title">Fundamental Rights under Article 19</h3>
-          <p class="card-excerpt">
-            Article 19 guarantees six fundamental freedoms to every Indian citizen — including
-            freedom of speech, assembly, and movement — with reasonable restrictions by the state.
-          </p>
-          <a href="#" class="card-link" onclick="openAndAsk('What are fundamental rights under Article 19 of the Indian Constitution?'); return false;">Ask VakilAI →</a>
-        </article>
-        <article class="card">
-          <span class="card-tag">Consumer Law</span>
-          <h3 class="card-title">Consumer Protection Act 2019 — What You Must Know</h3>
-          <p class="card-excerpt">
-            The 2019 Act vastly expands consumer rights: e-commerce liability, product liability,
-            a Central Consumer Protection Authority, and penalties for misleading advertisements.
-          </p>
-          <a href="#" class="card-link" onclick="openAndAsk('What are my rights under the Consumer Protection Act 2019?'); return false;">Ask VakilAI →</a>
-        </article>
-        <article class="card">
-          <span class="card-tag">RTI Act</span>
-          <h3 class="card-title">RTI Act — How to File an Application</h3>
-          <p class="card-excerpt">
-            Any citizen can seek information from any public authority within 30 days. Learn how
-            to draft your RTI request, pay the fee, and escalate to the Information Commission.
-          </p>
-          <a href="#" class="card-link" onclick="openAndAsk('How do I file an RTI application under the RTI Act 2005?'); return false;">Ask VakilAI →</a>
-        </article>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ FEATURES STRIP ═══ -->
-  <div class="feature-strip" id="features">
-    <div class="feature-strip-inner">
-      <h2 class="feature-strip-title">
-        Built on <span>production-grade</span><br/>legal AI architecture.
-      </h2>
-      <div class="features-grid">
-        <div class="feature">
-          <div class="feature-icon">🔍</div>
-          <div class="feature-name">RAG Retrieval</div>
-          <p class="feature-desc">Semantic search across 2,394 legal chunks using Qdrant vector store with MiniLM embeddings.</p>
-        </div>
-        <div class="feature">
-          <div class="feature-icon">🧠</div>
-          <div class="feature-name">LangGraph Routing</div>
-          <p class="feature-desc">4-intent classifier routes every question to the right handler — RAG, general law, or live web search.</p>
-        </div>
-        <div class="feature">
-          <div class="feature-icon">🌐</div>
-          <div class="feature-name">Live Web Search</div>
-          <p class="feature-desc">Tavily integration handles post-2023 amendments, recent judgments, and current events in Indian law.</p>
-        </div>
-        <div class="feature">
-          <div class="feature-icon">💬</div>
-          <div class="feature-name">Conversation Memory</div>
-          <p class="feature-desc">Redis-backed session memory retains context across your conversation for coherent follow-up answers.</p>
+    <!-- ═══ ACTS BANNER ═══ -->
+    <div class="acts-banner">
+      <div class="acts-inner">
+        <span class="acts-label">Covers</span>
+        <div class="acts-list">
+          <span class="act-pill">Indian Penal Code 1860</span>
+          <span class="act-pill">Constitution of India</span>
+          <span class="act-pill">RTI Act 2005</span>
+          <span class="act-pill">Consumer Protection Act 2019</span>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ═══ ACTS SECTION ═══ -->
-  <div id="acts">
-    <div class="section">
-      <div class="section-header">
-        <span class="section-num">02</span>
-        <div>
-          <p class="section-label">Indexed Statutes</p>
-          <h2 class="section-title">Four Acts. Every Section. Instantly Searchable.</h2>
-        </div>
-      </div>
-      <div class="cards-grid">
-        <div class="card">
-          <span class="card-tag">Criminal Law</span>
-          <h3 class="card-title">Indian Penal Code 1860</h3>
-          <p class="card-excerpt">India's primary criminal code covering offences against persons, property, public order, and the state — from Section 1 to Section 511.</p>
-          <a href="#" class="card-link" onclick="openAndAsk('Give me an overview of the Indian Penal Code 1860'); return false;">Explore →</a>
-        </div>
-        <div class="card">
-          <span class="card-tag">Constitutional Law</span>
-          <h3 class="card-title">Constitution of India</h3>
-          <p class="card-excerpt">The supreme law of India. Covers Fundamental Rights, Directive Principles, Union and State powers, constitutional amendments, and more.</p>
-          <a href="#" class="card-link" onclick="openAndAsk('What are the Fundamental Rights guaranteed by the Constitution of India?'); return false;">Explore →</a>
-        </div>
-        <div class="card">
-          <span class="card-tag">Transparency Law</span>
-          <h3 class="card-title">RTI Act 2005</h3>
-          <p class="card-excerpt">Empowers every citizen to request information from public authorities. Covers exemptions, appeals, penalties, and the role of Information Commissions.</p>
-          <a href="#" class="card-link" onclick="openAndAsk('What information can I request under the RTI Act 2005?'); return false;">Explore →</a>
-        </div>
-        <div class="card">
-          <span class="card-tag">Consumer Rights</span>
-          <h3 class="card-title">Consumer Protection Act 2019</h3>
-          <p class="card-excerpt">Protects consumers against unfair trade practices, product liability, and deficient services. Covers District, State, and National Commissions.</p>
-          <a href="#" class="card-link" onclick="openAndAsk('How do I file a consumer complaint under the Consumer Protection Act 2019?'); return false;">Explore →</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ DISCLAIMER ═══ -->
-  <div class="disclaimer-bar">
-    <div class="disclaimer-inner">
-      <span class="disclaimer-icon">⚠️</span>
-      <p class="disclaimer-text">
-        <strong>Legal Disclaimer:</strong> Content on VakilAI is for general informational and educational purposes only and
-        does not constitute legal advice. AI-generated answers may contain errors and should not be relied upon for legal decisions.
-        Laws are subject to change. Always consult a qualified and enrolled advocate before taking any legal action.
-      </p>
-    </div>
-  </div>
-
-  <!-- ═══ FOOTER ═══ -->
-  <footer>
-    <div class="footer-inner">
-      <div class="footer-top">
-        <div>
-          <div class="footer-brand">
-            <div class="footer-brand-icon">⚖️</div>
-            <span class="footer-brand-name">VakilAI</span>
+    <!-- ═══ ARTICLES ═══ -->
+    <div id="articles">
+      <div class="section">
+        <div class="section-header">
+          <span class="section-num">01</span>
+          <div>
+            <p class="section-label">Featured Articles</p>
+            <h2 class="section-title">Legal Knowledge, Simplified</h2>
           </div>
-          <p class="footer-tagline">Indian Legal Intelligence. For Every Citizen.</p>
         </div>
-        <div class="footer-links">
-          <div class="footer-col">
-            <h4>Legal Acts</h4>
-            <ul>
-              <li><a href="#acts">IPC 1860</a></li>
-              <li><a href="#acts">Constitution</a></li>
-              <li><a href="#acts">RTI Act 2005</a></li>
-              <li><a href="#acts">Consumer Protection</a></li>
-            </ul>
+        <div class="cards-grid">
+          <article class="card">
+            <div class="card-shimmer"></div>
+            <span class="card-tag">Constitutional Law</span>
+            <h3 class="card-title">Fundamental Rights under Article 19</h3>
+            <p class="card-excerpt">
+              Article 19 guarantees six fundamental freedoms to every Indian citizen — including
+              freedom of speech, assembly, and movement — with reasonable restrictions by the state.
+            </p>
+            <a href="#" class="card-link" onclick="openAndAsk('What are fundamental rights under Article 19 of the Indian Constitution?'); return false;">Ask VakilAI →</a>
+          </article>
+          <article class="card">
+            <div class="card-shimmer"></div>
+            <span class="card-tag">Consumer Law</span>
+            <h3 class="card-title">Consumer Protection Act 2019 — What You Must Know</h3>
+            <p class="card-excerpt">
+              The 2019 Act vastly expands consumer rights: e-commerce liability, product liability,
+              a Central Consumer Protection Authority, and penalties for misleading advertisements.
+            </p>
+            <a href="#" class="card-link" onclick="openAndAsk('What are my rights under the Consumer Protection Act 2019?'); return false;">Ask VakilAI →</a>
+          </article>
+          <article class="card">
+            <div class="card-shimmer"></div>
+            <span class="card-tag">RTI Act</span>
+            <h3 class="card-title">RTI Act — How to File an Application</h3>
+            <p class="card-excerpt">
+              Any citizen can seek information from any public authority within 30 days. Learn how
+              to draft your RTI request, pay the fee, and escalate to the Information Commission.
+            </p>
+            <a href="#" class="card-link" onclick="openAndAsk('How do I file an RTI application under the RTI Act 2005?'); return false;">Ask VakilAI →</a>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FEATURES STRIP ═══ -->
+    <div class="feature-strip" id="features">
+      <div class="feature-strip-inner">
+        <h2 class="feature-strip-title">
+          Built on <span>production-grade</span><br/>legal AI architecture.
+        </h2>
+        <div class="features-grid">
+          <div class="feature">
+            <div class="feature-flip">
+              <div class="feature-flip-front">🔍</div>
+              <div class="feature-flip-back">VECTOR<br/>SEARCH</div>
+            </div>
+            <div class="feature-name">RAG Retrieval</div>
+            <p class="feature-desc">Semantic search across 2,394 legal chunks using Qdrant vector store with MiniLM embeddings.</p>
           </div>
-          <div class="footer-col">
-            <h4>Platform</h4>
-            <ul>
-              <li><a href="#features">How it Works</a></li>
-              <li><a href="#articles">Articles</a></li>
-              <li><a href="#" onclick="openChat(); return false;">Ask VakilAI</a></li>
-            </ul>
+          <div class="feature">
+            <div class="feature-flip">
+              <div class="feature-flip-front">🧠</div>
+              <div class="feature-flip-back">LANG<br/>GRAPH</div>
+            </div>
+            <div class="feature-name">LangGraph Routing</div>
+            <p class="feature-desc">4-intent classifier routes every question to the right handler — RAG, general law, or live web search.</p>
+          </div>
+          <div class="feature">
+            <div class="feature-flip">
+              <div class="feature-flip-front">🌐</div>
+              <div class="feature-flip-back">TAVILY<br/>API</div>
+            </div>
+            <div class="feature-name">Live Web Search</div>
+            <p class="feature-desc">Tavily integration handles post-2023 amendments, recent judgments, and current events in Indian law.</p>
+          </div>
+          <div class="feature">
+            <div class="feature-flip">
+              <div class="feature-flip-front">💬</div>
+              <div class="feature-flip-back">REDIS<br/>SESSION</div>
+            </div>
+            <div class="feature-name">Conversation Memory</div>
+            <p class="feature-desc">Redis-backed session memory retains context across your conversation for coherent follow-up answers.</p>
           </div>
         </div>
       </div>
-      <div class="footer-bottom">
-        © 2026 VakilAI. All rights reserved. · Not a law firm. Not legal advice. · Built with LangGraph + RAG.
+    </div>
+
+    <!-- ═══ ACTS SECTION ═══ -->
+    <div id="acts">
+      <div class="section">
+        <div class="section-header">
+          <span class="section-num">02</span>
+          <div>
+            <p class="section-label">Indexed Statutes</p>
+            <h2 class="section-title">Four Acts. Every Section. Instantly Searchable.</h2>
+          </div>
+        </div>
+        <div class="cards-grid">
+          <div class="card">
+            <div class="card-shimmer"></div>
+            <span class="card-tag">Criminal Law</span>
+            <h3 class="card-title">Indian Penal Code 1860</h3>
+            <p class="card-excerpt">India's primary criminal code covering offences against persons, property, public order, and the state — from Section 1 to Section 511.</p>
+            <a href="#" class="card-link" onclick="openAndAsk('Give me an overview of the Indian Penal Code 1860'); return false;">Explore →</a>
+          </div>
+          <div class="card">
+            <div class="card-shimmer"></div>
+            <span class="card-tag">Constitutional Law</span>
+            <h3 class="card-title">Constitution of India</h3>
+            <p class="card-excerpt">The supreme law of India. Covers Fundamental Rights, Directive Principles, Union and State powers, constitutional amendments, and more.</p>
+            <a href="#" class="card-link" onclick="openAndAsk('What are the Fundamental Rights guaranteed by the Constitution of India?'); return false;">Explore →</a>
+          </div>
+          <div class="card">
+            <div class="card-shimmer"></div>
+            <span class="card-tag">Transparency Law</span>
+            <h3 class="card-title">RTI Act 2005</h3>
+            <p class="card-excerpt">Empowers every citizen to request information from public authorities. Covers exemptions, appeals, penalties, and the role of Information Commissions.</p>
+            <a href="#" class="card-link" onclick="openAndAsk('What information can I request under the RTI Act 2005?'); return false;">Explore →</a>
+          </div>
+          <div class="card">
+            <div class="card-shimmer"></div>
+            <span class="card-tag">Consumer Rights</span>
+            <h3 class="card-title">Consumer Protection Act 2019</h3>
+            <p class="card-excerpt">Protects consumers against unfair trade practices, product liability, and deficient services. Covers District, State, and National Commissions.</p>
+            <a href="#" class="card-link" onclick="openAndAsk('How do I file a consumer complaint under the Consumer Protection Act 2019?'); return false;">Explore →</a>
+          </div>
+        </div>
       </div>
     </div>
-  </footer>
+
+    <!-- ═══ DISCLAIMER ═══ -->
+    <div class="disclaimer-bar">
+      <div class="disclaimer-inner">
+        <span class="disclaimer-icon">⚠️</span>
+        <p class="disclaimer-text">
+          <strong>Legal Disclaimer:</strong> Content on VakilAI is for general informational and educational purposes only and
+          does not constitute legal advice. AI-generated answers may contain errors and should not be relied upon for legal decisions.
+          Laws are subject to change. Always consult a qualified and enrolled advocate before taking any legal action.
+        </p>
+      </div>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer>
+      <div class="footer-inner">
+        <div class="footer-top">
+          <div>
+            <div class="footer-brand">
+              <div class="footer-brand-icon">⚖️</div>
+              <span class="footer-brand-name">VakilAI</span>
+            </div>
+            <p class="footer-tagline">Indian Legal Intelligence. For Every Citizen.</p>
+          </div>
+          <div class="footer-links">
+            <div class="footer-col">
+              <h4>Legal Acts</h4>
+              <ul>
+                <li><a href="#acts">IPC 1860</a></li>
+                <li><a href="#acts">Constitution</a></li>
+                <li><a href="#acts">RTI Act 2005</a></li>
+                <li><a href="#acts">Consumer Protection</a></li>
+              </ul>
+            </div>
+            <div class="footer-col">
+              <h4>Platform</h4>
+              <ul>
+                <li><a href="#features">How it Works</a></li>
+                <li><a href="#articles">Articles</a></li>
+                <li><a href="#" onclick="openChat(); return false;">Ask VakilAI</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          © 2026 VakilAI. All rights reserved. · Not a law firm. Not legal advice. · Built with LangGraph + RAG.
+        </div>
+      </div>
+    </footer>
+
+  </div><!-- end .content-layer -->
 
   <!-- ═══ CHATBOT WIDGET ═══ -->
   <button id="chat-toggle" aria-label="Open VakilAI chat" onclick="openChat()">
@@ -1286,9 +1408,7 @@
       <button class="chat-reset" onclick="resetChat()" aria-label="Reset" title="New conversation">↺</button>
       <button class="chat-close" onclick="closeChat()" aria-label="Close">✕</button>
     </div>
-
     <div id="chat-messages"></div>
-
     <div class="chat-input-row">
       <input
         id="chat-input"
@@ -1306,15 +1426,217 @@
   </div>
 
   <script>
+    /* ═══════════════════════════════
+       THREE.JS SCENE
+    ═══════════════════════════════ */
+    (function() {
+      const isMobile = window.innerWidth < 768;
+      const canvas = document.getElementById('three-canvas');
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        powerPreference: 'high-performance'
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 5;
+
+      // Gold particles
+      const particleCount = isMobile ? 80 : 200;
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+      const opacities  = new Float32Array(particleCount);
+      for (let i = 0; i < particleCount; i++) {
+        positions[i * 3]     = (Math.random() - 0.5) * 20;
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+        opacities[i] = 0.2 + Math.random() * 0.6;
+      }
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const particleMat = new THREE.PointsMaterial({
+        color: 0xd4af5a,
+        size: 0.06,
+        transparent: true,
+        opacity: 0.7,
+        sizeAttenuation: true
+      });
+      const particles = new THREE.Points(geometry, particleMat);
+      scene.add(particles);
+
+      // Torus rings (scales of justice spinning in space)
+      const ringData = [
+        { r: 2.2, tube: 0.03, color: 0xd4af5a, rx: 0.5, ry: 0.3, rz: 0 },
+        { r: 1.6, tube: 0.025, color: 0xb8963e, rx: 1.0, ry: 0.8, rz: 0.5 },
+        { r: 3.0, tube: 0.02,  color: 0xd4af5a, rx: 0.2, ry: 1.2, rz: 1.0 },
+      ];
+      const rings = ringData.map(d => {
+        const geo = new THREE.TorusGeometry(d.r, d.tube, 16, 80);
+        const mat = new THREE.MeshBasicMaterial({ color: d.color, transparent: true, opacity: 0.18 });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.rotation.set(d.rx, d.ry, d.rz);
+        scene.add(mesh);
+        return { mesh, speed: { x: (Math.random() - 0.5) * 0.003, y: (Math.random() - 0.5) * 0.003 } };
+      });
+
+      // Mouse parallax
+      let mouseX = 0, mouseY = 0;
+      document.addEventListener('mousemove', e => {
+        mouseX = (e.clientX / window.innerWidth  - 0.5) * 0.8;
+        mouseY = (e.clientY / window.innerHeight - 0.5) * 0.8;
+      });
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const t = Date.now() * 0.0003;
+        particles.rotation.y = t * 0.05;
+        particles.rotation.x = t * 0.02;
+        rings.forEach(r => {
+          r.mesh.rotation.x += r.speed.x;
+          r.mesh.rotation.y += r.speed.y;
+        });
+        camera.position.x += (mouseX - camera.position.x) * 0.04;
+        camera.position.y += (-mouseY - camera.position.y) * 0.04;
+        camera.lookAt(scene.position);
+        renderer.render(scene, camera);
+      }
+      animate();
+    })();
+
+    /* ═══════════════════════════════
+       GSAP ANIMATIONS
+    ═══════════════════════════════ */
+    gsap.registerPlugin(ScrollTrigger);
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+
+      // Navbar scroll transition
+      ScrollTrigger.create({
+        trigger: '.content-layer',
+        start: 'top 80%',
+        onEnter:      () => document.getElementById('navbar').classList.add('scrolled'),
+        onLeaveBack:  () => document.getElementById('navbar').classList.remove('scrolled'),
+      });
+
+      // Hero entrance timeline
+      const heroTl = gsap.timeline({ delay: 0.1 });
+
+      heroTl.to('#hero-line', { scaleY: 1, duration: 1.2, ease: 'power3.out' }, 0.2);
+
+      heroTl.to('.hero-rule', { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 0.2);
+
+      heroTl.to('.hero-h1-line1', { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 0.5);
+      heroTl.to('.hero-h1-line2', { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 0.7);
+      heroTl.to('.hero-h1-em',   { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 0.9);
+
+      heroTl.to('.hero-sub',     { opacity: 1, duration: 0.7, ease: 'power2.out' }, 1.1);
+
+      heroTl.to('.hero-actions', { opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.4)' }, 1.3);
+
+      heroTl.to('.hero-stats',   { opacity: 1, duration: 0.6, ease: 'power2.out' }, 1.5);
+
+      // Number counters
+      heroTl.add(() => {
+        const chunksEl = document.getElementById('counter-chunks');
+        const pagesEl  = document.getElementById('counter-pages');
+        const obj1 = { val: 0 };
+        const obj2 = { val: 0 };
+        gsap.to(obj1, {
+          val: 2394, duration: 1.5, ease: 'power2.out',
+          onUpdate: () => { chunksEl.textContent = Math.floor(obj1.val).toLocaleString(); }
+        });
+        gsap.to(obj2, {
+          val: 581, duration: 1.5, ease: 'power2.out',
+          onUpdate: () => { pagesEl.textContent = Math.floor(obj2.val); }
+        });
+      }, 1.5);
+
+      // Article & Acts cards — ScrollTrigger stagger
+      gsap.from('#articles .card', {
+        scrollTrigger: { trigger: '#articles', start: 'top 80%' },
+        y: 40, opacity: 0, duration: 0.7, stagger: 0.12, ease: 'power3.out'
+      });
+
+      gsap.from('#acts .card', {
+        scrollTrigger: { trigger: '#acts', start: 'top 80%' },
+        y: 40, opacity: 0, duration: 0.7, stagger: 0.12, ease: 'power3.out'
+      });
+
+      // Feature strip stagger
+      gsap.from('.feature', {
+        scrollTrigger: { trigger: '#features', start: 'top 80%' },
+        y: 30, opacity: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out'
+      });
+
+      // 3D card hover tilt (desktop only — skip touch)
+      if (window.matchMedia('(pointer: fine)').matches) {
+        document.querySelectorAll('.card').forEach(card => {
+          const shimmer = card.querySelector('.card-shimmer');
+          card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top  + rect.height / 2;
+            const dx = (e.clientX - cx) / (rect.width  / 2);
+            const dy = (e.clientY - cy) / (rect.height / 2);
+            gsap.to(card, {
+              rotateY: dx * 6,
+              rotateX: -dy * 6,
+              translateY: -8,
+              duration: 0.3,
+              ease: 'power2.out',
+              transformPerspective: 800
+            });
+            if (shimmer) {
+              const mx = ((e.clientX - rect.left) / rect.width) * 100;
+              const my = ((e.clientY - rect.top)  / rect.height) * 100;
+              shimmer.style.setProperty('--mx', mx + '%');
+              shimmer.style.setProperty('--my', my + '%');
+            }
+          });
+          card.addEventListener('mouseleave', () => {
+            gsap.to(card, { rotateY: 0, rotateX: 0, translateY: 0, duration: 0.4, ease: 'power2.out' });
+          });
+        });
+      }
+
+      // Chat toggle ripple
+      document.getElementById('chat-toggle').addEventListener('click', function(e) {
+        const btn = this;
+        const ripple = document.createElement('span');
+        Object.assign(ripple.style, {
+          position: 'absolute', borderRadius: '50%',
+          background: 'rgba(184,150,62,0.35)',
+          width: '60px', height: '60px',
+          left: '50%', top: '50%',
+          transform: 'translate(-50%,-50%) scale(0)',
+          pointerEvents: 'none'
+        });
+        btn.appendChild(ripple);
+        gsap.to(ripple, { scale: 2.5, opacity: 0, duration: 0.5, ease: 'power2.out', onComplete: () => ripple.remove() });
+      });
+
+    } /* end prefers-reduced-motion guard */
+
+    /* ═══════════════════════════════
+       CHAT LOGIC — DO NOT MODIFY
+    ═══════════════════════════════ */
     const API = '';
     const SESSION_ID = crypto.randomUUID();
     let isOnline = true;
     let isBotTyping = false;
     let firstMessage = true;
 
-    // ── mobile menu ──
     function toggleMenu() {
-      const btn = document.getElementById('hamburger');
+      const btn  = document.getElementById('hamburger');
       const menu = document.getElementById('mobile-menu');
       btn.classList.toggle('open');
       menu.classList.toggle('open');
@@ -1325,7 +1647,6 @@
       document.getElementById('mobile-menu').classList.remove('open');
     }
 
-    // ── panel open / close ──
     function openChat() {
       document.getElementById('chat-panel').classList.add('open');
       document.getElementById('unread-dot').style.display = 'none';
@@ -1344,7 +1665,6 @@
       }, 400);
     }
 
-    // ── health check ──
     async function checkHealth() {
       try {
         const r = await fetch(`${API}/health`, { signal: AbortSignal.timeout(4000) });
@@ -1364,7 +1684,6 @@
       if (status) status.textContent = isOnline ? '● Online · Ready' : '● Offline';
     }
 
-    // ── message rendering ──
     function appendMessage(role, text, disclaimer) {
       const container = document.getElementById('chat-messages');
       const wrapper = document.createElement('div');
@@ -1446,10 +1765,9 @@
       lastMsg.appendChild(meta);
     }
 
-    // ── send ──
     async function sendMessage() {
       if (isBotTyping) return;
-      const input = document.getElementById('chat-input');
+      const input   = document.getElementById('chat-input');
       const sendBtn = document.getElementById('chat-send');
       const question = input.value.trim();
       if (!question) return;
@@ -1500,7 +1818,6 @@
       input.focus();
     }
 
-    // ── reset ──
     function resetChat() {
       firstMessage = true;
       document.getElementById('chat-messages').innerHTML = '';
@@ -1509,7 +1826,6 @@
       );
     }
 
-    // ── init ──
     checkHealth();
     resetChat();
   </script>
