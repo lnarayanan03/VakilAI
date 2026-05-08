@@ -30,33 +30,37 @@ embedder = HuggingFaceEmbeddings(
     encode_kwargs={"normalize_embeddings": True}
 )
 
-# ─── STEP 2: VECTOR STORE CONNECTION ──────────────────────────────────
-# Block 6: connect to existing Qdrant collection
-# ingest.py created this — we just connect to it
-# No re-embedding here — just reading what's already stored
+# ─── STEP 2: RETRIEVER (lazy) ─────────────────────────────────────────
+# Qdrant client and vectorstore are created on first use so that a
+# missing/unreachable Qdrant endpoint doesn't crash the app at import time.
 
-client = QdrantClient(url=os.getenv("QDRANT_URL"), api_key=os.getenv("QDRANT_API_KEY"))
+_retriever = None
 
-vectorstore = QdrantVectorStore(
-    client=client,
-    collection_name=os.getenv("QDRANT_COLLECTION", "vakil_legal"),
-    embedding=embedder,
-)
+def get_retriever():
+    global _retriever
+    if _retriever is not None:
+        return _retriever
 
-# ─── STEP 3: RETRIEVER ────────────────────────────────────────────────
-# Block 6: score_threshold over fixed k
-# Only returns chunks with similarity > 0.3
-# Dynamic — might return 2 chunks or 8 depending on query
-# Better than hardcoded k=4 which always returns exactly 4
-# even if 3 of them are irrelevant
+    url = os.getenv("QDRANT_URL")
+    api_key = os.getenv("QDRANT_API_KEY")
 
-retriever = vectorstore.as_retriever(
-    search_type="similarity_score_threshold",
-    search_kwargs={
-        "score_threshold": 0.3,  # lower threshold = more recall for legal Q&A
-        "k": 10,                   # max 6 chunks
-    }
-)
+    if not url:
+        raise RuntimeError("QDRANT_URL env var not set")
+
+    client = QdrantClient(url=url, api_key=api_key)
+    vectorstore = QdrantVectorStore(
+        client=client,
+        collection_name=os.getenv("QDRANT_COLLECTION", "vakil_legal"),
+        embedding=embedder,
+    )
+    _retriever = vectorstore.as_retriever(
+        search_type="similarity_score_threshold",
+        search_kwargs={
+            "score_threshold": 0.3,
+            "k": 10,
+        }
+    )
+    return _retriever
 
 # ─── STEP 4: FORMAT DOCS ──────────────────────────────────────────────
 # Block 6: converts List[Document] → string for {context} slot
@@ -125,7 +129,7 @@ structured_llm = llm.with_structured_output(LegalAnswer)
 
 rag_chain = (
     {
-        "context":  RunnableLambda(lambda x: x["question"]) | retriever | format_docs,
+        "context":  RunnableLambda(lambda x: x["question"]) | RunnableLambda(lambda q: get_retriever().invoke(q)) | format_docs,
         "question": RunnablePassthrough()
     }
     | prompt
