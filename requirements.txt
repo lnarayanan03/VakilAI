@@ -20,6 +20,7 @@ sse-starlette
 # Vector store + embeddings
 qdrant-client
 sentence-transformers
+fastembed
 
 # Document loading
 pypdf
