@@ -52,6 +52,7 @@ def get_retriever():
         client=client,
         collection_name=os.getenv("QDRANT_COLLECTION", "vakil_legal"),
         embedding=embedder,
+        vector_name="dense",
     )
     _retriever = vectorstore.as_retriever(
         search_type="similarity_score_threshold",
