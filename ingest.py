@@ -101,7 +101,7 @@ print("   Embedding model loaded")
 print("🧠 Loading sparse embedding model...")
 print("   (downloads SPLADE model first time, cached after)")
 
-sparse_embedder = SparseTextEmbedding(model_name="prithivida/Splade_PP_ENv1")
+sparse_embedder = SparseTextEmbedding(model_name="prithivida/Splade_PP_en_v1")
 
 print("   Sparse embedding model loaded")
 
