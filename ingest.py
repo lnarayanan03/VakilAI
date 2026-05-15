@@ -5,9 +5,17 @@ from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader, DirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_qdrant import QdrantVectorStore
+from fastembed.sparse import SparseTextEmbedding
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
+from qdrant_client.models import (
+    Distance,
+    NamedSparseVector,
+    NamedVector,
+    PointStruct,
+    SparseVector,
+    SparseVectorParams,
+    VectorParams,
+)
 
 load_dotenv()
 
@@ -90,6 +98,13 @@ embedder = HuggingFaceEmbeddings(
 
 print("   Embedding model loaded")
 
+print("🧠 Loading sparse embedding model...")
+print("   (downloads SPLADE model first time, cached after)")
+
+sparse_embedder = SparseTextEmbedding(model_name="prithivida/Splade_PP_ENv1")
+
+print("   Sparse embedding model loaded")
+
 # ─── STEP 5: STORE IN QDRANT ──────────────────────────────────────────
 # Block 6: vector store — stores vectors + original text together
 # Qdrant Cloud — stores vectors + original text together
@@ -110,22 +125,53 @@ if collection_name in existing:
 
 client.create_collection(
     collection_name=collection_name,
-    vectors_config=VectorParams(
-        size=384,           # MiniLM output dimension
-        distance=Distance.COSINE  # cosine similarity for semantic search
-    )
+    vectors_config={
+        "dense": VectorParams(
+            size=384,           # MiniLM output dimension
+            distance=Distance.COSINE  # cosine similarity for semantic search
+        )
+    },
+    sparse_vectors_config={
+        "sparse": SparseVectorParams()
+    }
 )
 
 # Embed all chunks and store — this takes a few minutes
-vectorstore = QdrantVectorStore(
-    client=client,
-    collection_name=collection_name,
-    embedding=embedder,
-)
 batch_size = 100
 for i in range(0, len(chunks), batch_size):
     batch = chunks[i:i + batch_size]
-    vectorstore.add_documents(batch)
+    texts = [doc.page_content for doc in batch]
+    dense_vectors = embedder.embed_documents(texts)
+    sparse_vectors = list(sparse_embedder.embed(texts))
+
+    points = []
+    for j, doc in enumerate(batch):
+        dense_vector = NamedVector(name="dense", vector=dense_vectors[j])
+        sparse_vector = NamedSparseVector(
+            name="sparse",
+            vector=SparseVector(
+                indices=[int(index) for index in sparse_vectors[j].indices],
+                values=[float(value) for value in sparse_vectors[j].values],
+            )
+        )
+        points.append(
+            PointStruct(
+                id=i + j,
+                vector={
+                    dense_vector.name: dense_vector.vector,
+                    sparse_vector.name: sparse_vector.vector,
+                },
+                payload={
+                    "page_content": doc.page_content,
+                    "metadata": doc.metadata,
+                },
+            )
+        )
+
+    client.upsert(
+        collection_name=collection_name,
+        points=points,
+    )
     print(f"   Uploaded {min(i + batch_size, len(chunks))}/{len(chunks)} chunks")
 
 print(f"✅ Indexed {len(chunks)} chunks into Qdrant collection '{collection_name}'")
